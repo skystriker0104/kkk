@@ -147,3 +147,83 @@ public class b5 {
         svc.submitData(sc, qc, (java.io.Serializable) res);
     }
 }
+// wsimport -keep -p ws "http://36.50.135.242:2221/DataService?wsdl"
+// wsimport -keep -p ws "http://36.50.135.242:2221/CharacterService?wsdl"
+// wsimport -keep -p ws "http://36.50.135.242:2221/ObjectService?wsdl"
+import ws.*;
+import java.net.URL;
+import java.util.*;
+
+public class Client961 {
+    public static void main(String[] args) throws Exception {
+        String host = "36.50.135.242", SC = "B21DCCN001", QC = "XXXXXXXX";
+        DataService_Service service = new DataService_Service(new URL("http://" + host + ":2221/DataService?wsdl"));
+        DataService port = service.getDataServicePort();
+
+        List<Integer> data = port.getData(SC, QC);
+
+        List<String> s = new ArrayList<>();
+        for (Integer x : data) s.add(String.valueOf(x));
+        s.sort((a, b) -> (b + a).compareTo(a + b));
+
+        StringBuilder sb = new StringBuilder();
+        for (String x : s) sb.append(x);
+        String result = sb.toString();
+        if (result.startsWith("0")) result = "0"; // trường hợp toàn số 0
+
+        port.submitDataString(SC, QC, result);
+    }
+}
+
+
+import ws.*;
+import java.net.URL;
+import java.util.*;
+
+public class Client1411 {
+    public static void main(String[] args) throws Exception {
+        String host = "36.50.135.242", SC = "B21DCCN001", QC = "XXXXXXXX";
+        DataService_Service service = new DataService_Service(new URL("http://" + host + ":2221/DataService?wsdl"));
+        DataService port = service.getDataServicePort();
+
+        List<Integer> data = port.getData(SC, QC);
+        int sum = 0;
+        for (int x : data) sum += x;
+
+        port.submitDataInt(SC, QC, sum);
+    }
+}
+
+
+import ws.*;
+import java.net.URL;
+import java.util.*;
+
+public class Client1428 {
+    static int vowels(String w) {
+        int c = 0;
+        for (char ch : w.toLowerCase().toCharArray())
+            if ("aeiou".indexOf(ch) >= 0) c++;
+        return c;
+    }
+
+    public static void main(String[] args) throws Exception {
+        String host = "36.50.135.242", SC = "B21DCCN001", QC = "XXXXXXXX";
+        CharacterService_Service service = new CharacterService_Service(new URL("http://" + host + ":2221/CharacterService?wsdl"));
+        CharacterService port = service.getCharacterServicePort();
+
+        List<String> words = port.requestStringArray(SC, QC);
+
+        TreeMap<Integer, List<String>> groups = new TreeMap<>();
+        for (String w : words)
+            groups.computeIfAbsent(vowels(w), k -> new ArrayList<>()).add(w);
+
+        List<String> result = new ArrayList<>();
+        for (List<String> g : groups.values()) {
+            Collections.sort(g);
+            result.add(String.join(", ", g));
+        }
+
+        port.submitCharacterStringArray(SC, QC, result);
+    }
+}
